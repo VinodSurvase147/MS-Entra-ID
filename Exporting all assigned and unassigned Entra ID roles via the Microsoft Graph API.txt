@@ -1,0 +1,75 @@
+
+Exporting all assigned and unassigned Entra ID roles via the Microsoft Graph API involves several steps. Here's a detailed guide to help you through the process:
+
+Prerequisites
+1. Microsoft Entra ID P1 or P2 license.
+2. Admin consent for using Graph Explorer or Microsoft Graph API.
+3. Microsoft Graph PowerShell module installed.
+
+Steps to Export Entra ID Roles
+
+#1. Install Microsoft Graph PowerShell Module
+If you haven't already installed the Microsoft Graph PowerShell module, you can do so using the following command:
+
+Install-Module Microsoft.Graph -Scope CurrentUser
+
+
+#2. Connect to Microsoft Graph
+You need to connect to Microsoft Graph with the necessary permissions:
+
+Connect-MgGraph -Scopes "RoleManagement.Read.Directory", "Directory.Read.All"
+
+
+#3. Export Roles Using PowerShell Script
+Here's a PowerShell script to export all assigned and unassigned roles:
+
+
+# Connect to Microsoft Graph
+Connect-MgGraph -Scopes "RoleManagement.Read.Directory", "Directory.Read.All"
+
+# Get all role definitions
+$Roles = Get-MgRoleManagementDirectoryRoleDefinition -All
+
+# Initialize an array to store role assignments
+$RoleAssignments = @()
+
+# Loop through each role and get assignments
+foreach ($role in $Roles) {
+    $Assignments = Get-MgRoleManagementDirectoryRoleAssignment -Filter "roleDefinitionId eq '$($role.Id)'" -All
+    foreach ($assignment in $Assignments) {
+        $RoleAssignments += [pscustomobject]@{
+            RoleName = $role.DisplayName
+            PrincipalName = $assignment.Principal.DisplayName
+            PrincipalType = $assignment.Principal.Type
+            AssignmentType = "Assigned"
+        }
+    }
+
+    # Check for unassigned roles
+    if ($Assignments.Count -eq 0) {
+        $RoleAssignments += [pscustomobject]@{
+            RoleName = $role.DisplayName
+            PrincipalName = "None"
+            PrincipalType = "None"
+            AssignmentType = "Unassigned"
+        }
+    }
+}
+
+# Export the role assignments to a CSV file
+$RoleAssignments | Export-Csv -Path "C:\Path\To\Your\ExportedRoles.csv" -NoTypeInformation
+
+
+Detailed Explanation
+1. Connect to Microsoft Graph: This step ensures you have the necessary permissions to read role assignments.
+2. Get Role Definitions: The script retrieves all role definitions in your Entra ID.
+3. Get Role Assignments: It loops through each role to get the assignments and checks for unassigned roles.
+4. Create a Report: It combines the data into a single report.
+5. Export to CSV: Finally, the report is exported to a CSV file for easy viewing and analysis.
+
+Additional Resources
+- Microsoft Graph API Documentation
+- Microsoft Graph PowerShell SDK
+
+If you have any specific questions or need further assistance, feel free to ask!
+

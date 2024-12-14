@@ -1,0 +1,88 @@
+
+
+What is OAuth and OAuth 2.0?
+
+OAuth (Open Authorization) is a standard protocol that allows a website or application to access resources hosted by other web apps on behalf of a user, without sharing the user's credentials. OAuth 2.0, the latest version, replaced OAuth 1.0 in 2012 and is now the industry standard for online authorization[1](https://auth0.com/intro-to-iam/what-is-oauth-2).
+
+How OAuth 2.0 Works
+
+OAuth 2.0 involves several key roles and steps:
+
+1. Roles:
+   - Resource Owner: The user who owns the data or resource.
+   - Client: The application requesting access to the resource.
+   - Authorization Server: The server that authenticates the user and issues access tokens.
+   - Resource Server: The server hosting the protected resources, which accepts and validates access tokens.
+
+2. Steps:
+   - Authorization Request: The client requests authorization from the resource owner.
+   - Authorization Grant: The resource owner grants authorization, typically through a consent screen.
+   - Access Token Request: The client requests an access token from the authorization server using the authorization grant.
+   - Access Token Response: The authorization server issues an access token to the client.
+   - Resource Request: The client uses the access token to request the protected resource from the resource server.
+   - Resource Response: The resource server validates the access token and returns the requested resource.
+
+OAuth 2.0 Flows
+
+OAuth 2.0 supports several authorization flows to accommodate different use cases:
+
+1. Authorization Code Flow:
+   - Use-Case: Web applications where the client can securely store a client secret.
+   - Example: A web app requesting access to a user's Google Calendar.
+
+2. Implicit Flow:
+   - Use-Case: Single-page applications (SPAs) where the client cannot securely store a client secret.
+   - Example: A JavaScript app accessing a user's profile information.
+
+3. Resource Owner Password Credentials Flow:
+   - Use-Case: Trusted applications where the client can directly handle user credentials.
+   - Example: A mobile app where the user directly enters their username and password.
+
+4. Client Credentials Flow:
+   - Use-Case: Server-to-server communication where no user is involved.
+   - Example: A backend service accessing another service's API.
+
+5. Device Code Flow:
+   - Use-Case: Devices with limited input capabilities.
+   - Example: A smart TV requesting access to a user's streaming service account.
+
+6. Refresh Token Flow:
+   - Use-Case: Obtaining a new access token using a refresh token without re-authenticating the user.
+   - Example: A web app maintaining a user's session without requiring them to log in again.
+
+Use-Cases of OAuth 2.0
+
+1. Third-Party App Integration:
+   - Scenario: Allowing third-party apps to access user data without sharing passwords.
+   - Example: A fitness app accessing a user's health data from a wearable device.
+
+2. Single Sign-On (SSO):
+   - Scenario: Enabling users to log in to multiple applications with a single set of credentials.
+   - Example: Using Google or Facebook login to access various web services.
+
+3. API Access:
+   - Scenario: Securing API endpoints by requiring access tokens.
+   - Example: A developer accessing a cloud service's API to manage resources.
+
+4. Delegated Access:
+   - Scenario: Allowing users to delegate access to their resources to other users or services.
+   - Example: A project management tool allowing team members to access shared documents.
+
+Example: OAuth 2.0 Authorization Code Flow
+
+1. User Initiates Login: The user clicks "Login with Google" on a web app.
+2. Authorization Request: The web app redirects the user to Google's authorization server.
+3. User Grants Permission: The user logs in to Google and grants permission to the web app.
+4. Authorization Code: Google redirects the user back to the web app with an authorization code.
+5. Access Token Request: The web app exchanges the authorization code for an access token.
+6. Access Token Response: Google issues an access token to the web app.
+7. API Request: The web app uses the access token to request the user's profile information from Google's API.
+8. API Response: Google returns the user's profile information to the web app.
+
+Additional Resources
+- [Auth0: What is OAuth 2.0?](https://auth0.com/intro-to-iam/what-is-oauth-2)[1](https://auth0.com/intro-to-iam/what-is-oauth-2)
+- [WorkOS: The Complete Guide to OAuth 2.0](https://workos.com/blog/the-complete-guide-to-oauth)[2](https://workos.com/blog/the-complete-guide-to-oauth)
+- [Microsoft Security: What is OAuth?](https://www.microsoft.com/en-us/security/business/security-101/what-is-oauth)[3](https://www.microsoft.com/en-us/security/business/security-101/what-is-oauth)
+
+If you have any specific questions or need further assistance, feel free to ask!
+

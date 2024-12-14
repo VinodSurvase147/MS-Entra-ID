@@ -1,0 +1,107 @@
+What is WS-Fed in Entra ID and how it works and what are the different use-cases when to use WS-Fed?
+
+What is WS-Federation (WS-Fed) in Entra ID?
+
+WS-Federation (WS-Fed) is a protocol used for identity federation and single sign-on (SSO) in Microsoft Entra ID (formerly Azure AD). It allows users to authenticate with their existing credentials from a trusted identity provider (IdP) and access resources in another domain without needing to re-enter their credentials.
+
+How WS-Fed Works
+
+1. User Requests Access: A user attempts to access a resource that requires authentication.
+2. Redirection to IdP: The user is redirected to the WS-Fed identity provider (IdP) for authentication.
+3. Authentication: The IdP authenticates the user using their existing credentials.
+4. Token Issuance: Upon successful authentication, the IdP issues a security token containing the user's identity information and claims.
+5. Token Validation: The security token is sent back to the relying party (the resource the user is trying to access), which validates the token.
+6. Access Granted: If the token is valid, the user is granted access to the resource.
+
+Use-Cases for WS-Fed
+
+1. B2B Collaboration:
+   - Scenario: An organization wants to allow external partners to access internal resources using their own corporate credentials.
+   - Benefit: Simplifies access management and enhances security by leveraging existing identity systems.
+
+2. Single Sign-On (SSO):
+   - Scenario: Users need to access multiple applications without re-entering credentials.
+   - Benefit: Improves user experience and productivity by reducing the need for multiple logins.
+
+3. Legacy Application Integration:
+   - Scenario: Integrating older applications that support WS-Fed but not newer protocols like SAML or OAuth.
+   - Benefit: Enables modern identity management for legacy systems without extensive re-engineering.
+
+4. Cross-Domain Access:
+   - Scenario: Users need to access resources across different domains or organizations.
+   - Benefit: Facilitates seamless access across organizational boundaries.
+
+Setting Up WS-Fed in Entra ID
+
+#1. Register the Application
+First, register the application in Microsoft Entra ID:
+
+
+Connect-MgGraph -Scopes "Application.ReadWrite.All"
+
+$appDetails = @{
+    "displayName" = "MyWSFedApp"
+    "signInAudience" = "AzureADMyOrg"  # Single-tenant
+}
+
+$app = New-MgApplication -BodyParameter $appDetails
+$app
+
+
+#2. Configure WS-Fed Settings
+Next, configure the WS-Fed settings for the application:
+
+
+$wsFedSettings = @{
+    "identifierUris" = @("https://mywsfedapp.com")
+    "replyUrls" = @("https://mywsfedapp.com/wsfed")
+    "wsFedEndpoint" = "https://mywsfedapp.com/wsfed"
+}
+
+Update-MgApplication -ApplicationId $app.Id -BodyParameter $wsFedSettings
+
+
+#3. Add Claims Mapping Policy
+Create and assign a claims mapping policy to the application:
+
+
+$claimsMappingPolicy = @{
+    "definition" = @(
+        @{
+            "ClaimsMappingPolicy" = @{
+                "Version" = 1
+                "IncludeBasicClaimSet" = $true
+                "ClaimsSchema" = @(
+                    @{
+                        "Source" = "user"
+                        "ID" = "userPrincipalName"
+                        "SamlClaimType" = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"
+                    }
+                )
+            }
+        }
+    )
+    "displayName" = "WSFedClaimsMappingPolicy"
+    "isOrganizationDefault" = $false
+}
+
+$policy = New-MgPolicyClaimsMappingPolicy -BodyParameter $claimsMappingPolicy
+Add-MgServicePrincipalPolicy -ServicePrincipalId $app.Id -Id $policy.Id
+
+
+#4. Assign Users to the Application
+Assign users or groups to the application to enable access:
+
+
+$userId = "user-object-id"
+$servicePrincipalId = (Get-MgServicePrincipal -Filter "appId eq '$($app.AppId)'").Id
+
+New-MgServicePrincipalAppRoleAssignment -PrincipalId $userId -ResourceId $servicePrincipalId -AppRoleId "role-id"
+
+
+Additional Resources
+- [Microsoft Entra External ID Federation](https://learn.microsoft.com/en-us/entra/external-id/direct-federation)[1](https://learn.microsoft.com/en-us/entra/external-id/direct-federation)
+- [Set up AD FS Federation](https://learn.microsoft.com/en-us/entra/external-id/direct-federation-adfs)[2](https://learn.microsoft.com/en-us/entra/external-id/direct-federation-adfs)
+
+By following these steps, you can set up WS-Fed in Microsoft Entra ID and leverage its capabilities for various use-cases. If you have any specific questions or need further assistance, feel free to ask!
+

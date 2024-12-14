@@ -1,0 +1,113 @@
+
+
+Setting up Single Sign-On (SSO) with WS-Federation (WS-Fed) in Microsoft Entra ID via the Microsoft Graph API involves several steps. Here’s a detailed guide to help you through the process:
+
+Prerequisites
+1. Microsoft Entra ID tenant.
+2. Admin consent for using Microsoft Graph API.
+3. Microsoft Graph PowerShell module installed.
+
+Steps to Set Up SSO with WS-Fed
+
+#1. Install Microsoft Graph PowerShell Module
+If you haven't already installed the Microsoft Graph PowerShell module, you can do so using the following command:
+
+Install-Module Microsoft.Graph -Scope CurrentUser
+
+
+#2. Connect to Microsoft Graph
+You need to connect to Microsoft Graph with the necessary permissions:
+
+Connect-MgGraph -Scopes "Application.ReadWrite.All"
+
+
+#3. Register the Application
+First, register the application in Microsoft Entra ID:
+
+
+# Connect to Microsoft Graph
+Connect-MgGraph -Scopes "Application.ReadWrite.All"
+
+# Define the application details
+$appDetails = @{
+    "displayName" = "MyWSFedApp"
+    "signInAudience" = "AzureADMyOrg"  # Single-tenant
+}
+
+# Register the application
+$app = New-MgApplication -BodyParameter $appDetails
+
+# Output the application details
+$app
+
+
+#4. Configure WS-Fed Settings
+Next, configure the WS-Fed settings for the application:
+
+# Define WS-Fed settings
+$wsFedSettings = @{
+    "identifierUris" = @("https://mywsfedapp.com")
+    "replyUrls" = @("https://mywsfedapp.com/wsfed")
+    "wsFedEndpoint" = "https://mywsfedapp.com/wsfed"
+}
+
+# Update the application with WS-Fed settings
+Update-MgApplication -ApplicationId $app.Id -BodyParameter $wsFedSettings
+
+
+#5. Add Claims Mapping Policy
+Create and assign a claims mapping policy to the application:
+
+# Define claims mapping policy
+$claimsMappingPolicy = @{
+    "definition" = @(
+        @{
+            "ClaimsMappingPolicy" = @{
+                "Version" = 1
+                "IncludeBasicClaimSet" = $true
+                "ClaimsSchema" = @(
+                    @{
+                        "Source" = "user"
+                        "ID" = "userPrincipalName"
+                        "SamlClaimType" = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"
+                    }
+                )
+            }
+        }
+    )
+    "displayName" = "WSFedClaimsMappingPolicy"
+    "isOrganizationDefault" = $false
+}
+
+# Create the claims mapping policy
+$policy = New-MgPolicyClaimsMappingPolicy -BodyParameter $claimsMappingPolicy
+
+# Assign the policy to the application
+Add-MgServicePrincipalPolicy -ServicePrincipalId $app.Id -Id $policy.Id
+
+
+#6. Assign Users to the Application
+Assign users or groups to the application to enable access:
+
+
+# Define user and application details
+$userId = "user-object-id"
+$servicePrincipalId = (Get-MgServicePrincipal -Filter "appId eq '$($app.AppId)'").Id
+
+# Assign the user to the application
+New-MgServicePrincipalAppRoleAssignment -PrincipalId $userId -ResourceId $servicePrincipalId -AppRoleId "role-id"
+
+
+Detailed Explanation
+1. Connect to Microsoft Graph: Ensure you have the necessary permissions to create and configure applications.
+2. Register the Application: Create a new application in Microsoft Entra ID.
+3. Configure WS-Fed Settings: Define the WS-Fed endpoint and reply URLs.
+4. Add Claims Mapping Policy: Create a policy to map claims and assign it to the application.
+5. Assign Users: Grant access to users or groups.
+
+Additional Resources
+- Microsoft Graph API Documentation[1](https://learn.microsoft.com/en-us/graph/application-saml-sso-configure-api)
+- [Configure SAML/WS-Fed Federation](https://learn.microsoft.com/en-us/entra/external-id/direct-federation)[2](https://learn.microsoft.com/en-us/entra/external-id/direct-federation)
+
+By following these steps, you can set up SSO with WS-Fed in Microsoft Entra ID using the Microsoft Graph API. If you have any specific questions or need further assistance, feel free to ask!
+

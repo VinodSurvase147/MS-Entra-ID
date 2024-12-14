@@ -1,0 +1,121 @@
+
+
+Registering an application in Microsoft Entra ID (formerly Azure AD) with different account types (single-tenant, multi-tenant, multi-tenant with personal Microsoft accounts, and personal Microsoft accounts only) via the Microsoft Graph API involves several steps. Here’s a detailed guide:
+
+Prerequisites
+1. Microsoft Entra ID tenant.
+2. Admin consent for using Microsoft Graph API.
+3. Microsoft Graph PowerShell module installed.
+
+Steps to Register an Application
+
+#1. Install Microsoft Graph PowerShell Module
+If you haven't already installed the Microsoft Graph PowerShell module, you can do so using the following command:
+
+Install-Module Microsoft.Graph -Scope CurrentUser
+
+
+#2. Connect to Microsoft Graph
+You need to connect to Microsoft Graph with the necessary permissions:
+
+Connect-MgGraph -Scopes "Application.ReadWrite.All"
+
+
+#3. Register the Application
+Here’s a PowerShell script to register an application with different account types:
+
+
+# Connect to Microsoft Graph
+Connect-MgGraph -Scopes "Application.ReadWrite.All"
+
+# Define the application details
+$appDetails = @{
+    "displayName" = "MyApp"
+    "signInAudience" = "AzureADMyOrg"  # Single-tenant
+}
+
+# Register the application
+$app = New-MgApplication -BodyParameter $appDetails
+
+# Output the application details
+$app
+
+
+Account Types
+- Single-tenant: `"signInAudience" = "AzureADMyOrg"`
+- Multi-tenant: `"signInAudience" = "AzureADMultipleOrgs"`
+- Multi-tenant with personal Microsoft accounts: `"signInAudience" = "AzureADandPersonalMicrosoftAccount"`
+- Personal Microsoft accounts only: `"signInAudience" = "PersonalMicrosoftAccount"`
+
+#4. Register Application for Multi-Tenant
+To register an application for multi-tenant use, modify the `signInAudience` parameter:
+
+```powershell
+$appDetails = @{
+    "displayName" = "MyApp"
+    "signInAudience" = "AzureADMultipleOrgs"  # Multi-tenant
+}
+
+$app = New-MgApplication -BodyParameter $appDetails
+$app
+
+
+#5. Register Application for Multi-Tenant with Personal Microsoft Accounts
+To register an application for multi-tenant use with personal Microsoft accounts, modify the `signInAudience` parameter:
+
+
+$appDetails = @{
+    "displayName" = "MyApp"
+    "signInAudience" = "AzureADandPersonalMicrosoftAccount"  # Multi-tenant with personal Microsoft accounts
+}
+
+$app = New-MgApplication -BodyParameter $appDetails
+$app
+
+
+#6. Register Application for Personal Microsoft Accounts Only
+To register an application for personal Microsoft accounts only, modify the `signInAudience` parameter:
+
+
+$appDetails = @{
+    "displayName" = "MyApp"
+    "signInAudience" = "PersonalMicrosoftAccount"  # Personal Microsoft accounts only
+}
+
+$app = New-MgApplication -BodyParameter $appDetails
+$app
+
+
+Additional Configuration
+After registering the application, you might need to configure additional settings such as redirect URIs, API permissions, and certificates or secrets.
+
+#7. Add Redirect URIs
+
+$redirectUris = @("https://myapp.com/auth/callback")
+
+Update-MgApplication -ApplicationId $app.Id -Web @{ "redirectUris" = $redirectUris }
+
+
+#8. Add API Permissions
+
+$apiPermissions = @(
+    @{
+        "resourceAppId" = "00000003-0000-0000-c000-000000000000"  # Microsoft Graph
+        "resourceAccess" = @(
+            @{
+                "id" = "User.Read"
+                "type" = "Scope"
+            }
+        )
+    }
+)
+
+Update-MgApplication -ApplicationId $app.Id -RequiredResourceAccess $apiPermissions
+
+
+Additional Resources
+- Microsoft Graph API Documentation[1](https://learn.microsoft.com/en-us/entra/identity-platform/single-and-multi-tenant-apps)
+- [Register an Application with Microsoft Identity Platform](https://learn.microsoft.com/en-us/entra/identity-platform/quickstart-register-app)[2](https://learn.microsoft.com/en-us/entra/identity-platform/quickstart-register-app)
+
+By following these steps, you can register applications in Microsoft Entra ID with various account types using the Microsoft Graph API. If you have any specific questions or need further assistance, feel free to ask!
+
